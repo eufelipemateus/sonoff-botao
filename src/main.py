@@ -3,8 +3,6 @@ import config
 import os
 from plyer import notification 
 
-
-
 s = sonoff.Sonoff(config.username, config.password, config.api_region)
 
 devices = s.get_devices()

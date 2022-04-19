@@ -6,6 +6,24 @@
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+
+ifeq '$(findstring ;,$(PATH))' ';'
+    detected_OS := Windows
+else
+    detected_OS := $(shell uname 2>/dev/null || echo Unknown)
+    detected_OS := $(patsubst CYGWIN%,Cygwin,$(detected_OS))
+    detected_OS := $(patsubst MSYS%,MSYS,$(detected_OS))
+    detected_OS := $(patsubst MINGW%,MSYS,$(detected_OS))
+endif
+
+ifeq ($(detected_OS),Windows)
+    IMPORTFLAGS = --hidden-import plyer.platforms.win.notification
+endif
+ifeq ($(detected_OS),Linux)
+    IMPORTFLAGS =  --hidden-import plyer.platforms.linux.notification
+endif
+
+
 ifeq ($(origin .RECIPEPREFIX), undefined)
   $(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
@@ -47,9 +65,9 @@ clean-build: $(VENV)/activate ## Clean previous build
 
 build: export PYTHONOPTIMIZE = 1
 build: $(VENV)/activate ## Build the project for the current platform
-#> @sed 's/DEV = True/DEV = False/' $(WORKDIR)/control.py -i
 > $(PYINSTALLER) --icon=light.ico --clean --windowed --onefile \
-    --name=${PROJECT_NAME} $(WORKDIR)/main.py
+>	--name=${PROJECT_NAME} $(IMPORTFLAGS) \
+	$(WORKDIR)/main.py
 
 run: $(VENV)/activate  ## Launch the project
 > $(PYTHON) $(WORKDIR)/main.py
