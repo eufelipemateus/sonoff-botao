@@ -3,4 +3,10 @@ __pycache__
 env
 dist
 build
-.spec
+*.spec
+lib
+lib64
+bin
+include
+share
+.pytest_cache
